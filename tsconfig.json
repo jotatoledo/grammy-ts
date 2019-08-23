@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "baseUrl": ".",
+    "sourceMap": true,
+    "declaration": true,
+    "moduleResolution": "node",
+    "target": "es5",
+    "downlevelIteration": true,
+    "typeRoots": ["node_modules/@types"],
+    "module": "commonjs",
+    "lib": ["es2017"],
+    "strict": true,
+    "paths": {
+      "grammy-js": ["src/index.ts"]
+    }
+  },
+  "include": ["src/**/*", "test/**/*"]
+}
