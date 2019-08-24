@@ -4,6 +4,7 @@
   "description": "Another LL(K) grammar analyzer",
   "scripts": {
     "build": "tsc --p src/tsconfig.json",
+    "coveralls": "cat ./coverage/lcov.info | node ./node_modules/coveralls/bin/coveralls.js",
     "test": "jest --forceExit --coverage --verbose",
     "test:watch": "npm run test -- --watchAll"
   },
@@ -17,11 +18,15 @@
   "bugs": {
     "url": "https://github.com/jotatoledo/grammar-ts/issues"
   },
+  "engines": {
+    "node": ">=10.16.3",
+    "npm": ">=6"
+  },
   "repository": {
     "url": "https://github.com/jotatoledo/grammar-ts.git",
     "type": "git"
   },
-  "author":{
+  "author": {
     "name": "José Toledo Navarro",
     "email": "jotatoledon@gmail.com",
     "url": "https://github.com/jotatoledo"
@@ -29,6 +34,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^24.0.18",
+    "coveralls": "^3.0.6",
     "jest": "^24.9.0",
     "prettier": "^1.18.2",
     "ts-jest": "^24.0.2",
