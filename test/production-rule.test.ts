@@ -9,7 +9,11 @@ describe('Rule', () => {
     expect(() => new ProductionRule('S', ['a', ''])).toThrow();
   });
 
-  it('throw if replacement tokens is empty', () => {
+  it('throws if replacement tokens is null', () => {
+    expect(() => new ProductionRule('S', null)).toThrow();
+  });
+
+  it('throws if replacement tokens is empty', () => {
     expect(() => new ProductionRule('S', [])).toThrow();
   });
 
