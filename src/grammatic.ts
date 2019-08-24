@@ -25,28 +25,28 @@ export class Grammatic {
     this._rules = [...rules];
   }
 
-  get terminals(): string[] {
-    return Array.from(this._terminals);
+  get terminals(): Set<string> {
+    return new Set(this._terminals);
   }
 
-  get nonTerminals(): string[] {
-    return Array.from(this._nonTerminals);
+  get nonTerminals(): Set<string> {
+    return new Set(this._nonTerminals);
   }
 
   private _firstSet: Map<string, Set<string>> | null = null;
   get firstSets(): Map<string, Set<string>> {
     if (!this._firstSet) {
-      this._SetFirstSet();
+      this.setFirstSet();
     }
-    return new Map(Array.from(this._firstSet!.entries()).map(([x, set]) => [x, new Set(set)]));
+    return new Map([...this._firstSet!].map(([x, set]) => [x, new Set(set)]));
   }
 
   private _followSets: Map<string, Set<string>> | null = null;
   get followSets(): Map<string, Set<string>> {
     if (!this._followSets) {
-      this._SetFollowSet();
+      this.setFollowSet();
     }
-    return new Map(Array.from(this._followSets!.entries()).map(([x, set]) => [x, new Set(set)]));
+    return new Map([...this._followSets!].map(([x, set]) => [x, new Set(set)]));
   }
 
   public isTerminal(item: string): boolean {
@@ -61,7 +61,7 @@ export class Grammatic {
     return item === EMPTY;
   }
 
-  private _SetFirstSet() {
+  private setFirstSet() {
     this._firstSet = this.generateSets();
     let change: boolean;
 
@@ -82,11 +82,13 @@ export class Grammatic {
     } while (change);
   }
 
-  private _SetFollowSet() {
-    const startNonTerminal = this._rules[0].inputNonTerminal;
-    let change: boolean;
+  private setFollowSet() {
     this._followSets = this.generateSets();
-    this._followSets.get(startNonTerminal)!.add(EOI);
+    let change: boolean;
+    if (!!this._rules.length) {
+      const startNonTerminal = this._rules[0].inputNonTerminal;
+      this._followSets.get(startNonTerminal)!.add(EOI);
+    }
 
     do {
       change = false;
@@ -127,7 +129,7 @@ export class Grammatic {
   }
 
   private generateSets(): Map<string, Set<string>> {
-    return new Map(this.nonTerminals.map(val => [val, new Set<string>()]));
+    return new Map([...this.nonTerminals].map(val => [val, new Set<string>()]));
   }
 
   private FiPrime(items: string[]): Set<string> {

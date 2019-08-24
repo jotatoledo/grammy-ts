@@ -7,29 +7,25 @@ describe('Grammatic', () => {
     const sut = createSut([]);
 
     expect(sut).toBeTruthy();
+    expect(sut.terminals).toBeTruthy();
+    expect(sut.nonTerminals).toBeTruthy();
+    expect(sut.firstSets).toBeTruthy();
+    expect(sut.followSets).toBeTruthy();
   });
 
   describe('Non-Terminals', () => {
-    it('should handle production rules with multiple transformations', () => {
-      const sut = createSut([
-        new ProductionRule('S', ['a', 'B']),
-        new ProductionRule('B', ['b']),
-        new ProductionRule('B', [EMPTY])
-      ]);
+    test.each(TestData)('it calculates correctly', ({ rules, nonTerminals }) => {
+      const sut = createSut(rules);
 
-      expect(sut.nonTerminals).toEqual(['S', 'B']);
+      expect(sut.nonTerminals).toEqual(nonTerminals);
     });
   });
 
   describe('Terminals', () => {
-    it('should handle production rules with multiple transformations', () => {
-      const sut = createSut([
-        new ProductionRule('S', ['a', 'B']),
-        new ProductionRule('B', ['b']),
-        new ProductionRule('B', [EMPTY])
-      ]);
+    test.each(TestData)('it calculates correctly', ({ rules, terminals }) => {
+      const sut = createSut(rules);
 
-      expect(sut.terminals).toEqual(['a', 'b']);
+      expect(sut.terminals).toEqual(terminals);
     });
   });
 
