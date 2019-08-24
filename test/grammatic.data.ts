@@ -28,5 +28,33 @@ export const GrammaticData: GrammaticInput[] = [
     new Set(['S', 'F']),
     new Map([['S', new Set(['(', 'a'])], ['F', new Set(['a'])]]),
     new Map([['S', new Set([EOI, '+'])], ['F', new Set([EOI, ')', '+'])]])
+  ),
+  new GrammaticInput(
+    [
+      new ProductionRule('E', ['T', "E'"]),
+      new ProductionRule("E'", ['+', 'T', "E'"]),
+      new ProductionRule("E'", [EMPTY]),
+      new ProductionRule('T', ['F', "T'"]),
+      new ProductionRule("T'", ['*', 'F', "T'"]),
+      new ProductionRule("T'", [EMPTY]),
+      new ProductionRule('F', ['(', 'E', ')']),
+      new ProductionRule('F', ['id'])
+    ],
+    new Set(['+', '*', '(', ')', 'id']),
+    new Set(['E', "E'", 'T', "T'", 'F']),
+    new Map([
+      ['E', new Set(['(', 'id'])],
+      ["E'", new Set(['+', EMPTY])],
+      ['T', new Set(['(', 'id'])],
+      ["T'", new Set(['*', EMPTY])],
+      ['F', new Set(['(', 'id'])]
+    ]),
+    new Map([
+      ['E', new Set([EOI, ')'])],
+      ["E'", new Set([EOI, ')'])],
+      ['T', new Set(['+', EOI, ')'])],
+      ["T'", new Set(['+', EOI, ')'])],
+      ['F', new Set(['*', '+', EOI, ')'])]
+    ])
   )
 ];
