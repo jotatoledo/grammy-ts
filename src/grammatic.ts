@@ -14,40 +14,49 @@ function extractVocabulary(rules: ProductionRule[]): { terminals: Set<string>; n
 }
 
 export class Grammatic {
-  private _firstSets: Map<string, Set<string>>;
-  private _predictionSets: Map<number, Set<string>>;
-  private _followSets: Map<string, Set<string>>;
+  private readonly _firstSets: Map<string, Set<string>>;
+  private readonly _predictionSets: Map<number, Set<string>>;
+  private readonly _followSets: Map<string, Set<string>>;
   private readonly _terminals: Set<string>;
   private readonly _nonTerminals: Set<string>;
   private readonly _rules: ProductionRule[];
 
   constructor(rules: ProductionRule[]) {
-    const { nonTerminals, terminals } = extractVocabulary(rules);
+    if (!rules) {
+      throw new Error('Rules can not be null');
+    }
+    this._rules = [...rules];
+    const { nonTerminals, terminals } = extractVocabulary(this._rules);
     this._nonTerminals = nonTerminals;
     this._terminals = terminals;
-    this._rules = [...rules];
-    this._firstSets = this.setFirstSets();
-    this._followSets = this.setFollowSets();
-    this._predictionSets = this.setPredictionSets();
+
+    this._firstSets = this.generateEmptySetsForNonTerminals();
+    this.calculateFirstSets();
+
+    this._followSets = this.generateEmptySetsForNonTerminals();
+    this.calculateFollowSets();
+
+    this._predictionSets = new Map<number, Set<string>>();
+    this.calculatePredictionSets();
   }
 
-  get terminals(): Set<string> {
+  public getTerminals(): Set<string> {
     return new Set(this._terminals);
   }
 
-  get nonTerminals(): Set<string> {
+  public getNonTerminals(): Set<string> {
     return new Set(this._nonTerminals);
   }
 
-  get firstSets(): Map<string, Set<string>> {
+  public getFirstSets(): Map<string, Set<string>> {
     return new Map([...this._firstSets!].map(([x, set]) => [x, new Set(set)]));
   }
 
-  get followSets(): Map<string, Set<string>> {
+  public getFollowSets(): Map<string, Set<string>> {
     return new Map([...this._followSets!].map(([x, set]) => [x, new Set(set)]));
   }
 
-  getPredictionSets(): Map<number, Set<string>> {
+  public getPredictionSets(): Map<number, Set<string>> {
     return new Map([...this._predictionSets!].map(([x, set]) => [x, new Set(set)]));
   }
 
@@ -59,20 +68,13 @@ export class Grammatic {
     return this._nonTerminals.has(item);
   }
 
-  public isEmpty(item: string): boolean {
-    return item === EMPTY;
-  }
-
-  private setPredictionSets(): Map<number, Set<string>> {
-    this._predictionSets = new Map<number, Set<string>>();
+  private calculatePredictionSets() {
     for (let ruleIndex = 0; ruleIndex < this._rules.length; ruleIndex++) {
-      this._predictionSets.set(ruleIndex, this.calcPredictSet(this._rules[ruleIndex]));
+      this._predictionSets.set(ruleIndex, this.calculatePredictionSet(this._rules[ruleIndex]));
     }
-    return this._predictionSets;
   }
 
-  private setFirstSets(): Map<string, Set<string>> {
-    this._firstSets = this.generateEmptySetsForNonTerminals();
+  private calculateFirstSets() {
     let change: boolean;
 
     do {
@@ -82,7 +84,7 @@ export class Grammatic {
         const activeFirstSet = this._firstSets.get(ruleNonTerminal)!;
         const originalSize = activeFirstSet.size;
 
-        for (const terminal of this.fiPrime(replacementSymbols)) {
+        for (const terminal of this.calculateFirstSet(replacementSymbols)) {
           activeFirstSet.add(terminal);
         }
         if (originalSize != activeFirstSet.size) {
@@ -90,11 +92,9 @@ export class Grammatic {
         }
       }
     } while (change);
-    return this._firstSets;
   }
 
-  private setFollowSets(): Map<string, Set<string>> {
-    this._followSets = this.generateEmptySetsForNonTerminals();
+  private calculateFollowSets() {
     let change: boolean;
     if (!!this._rules.length) {
       const startNonTerminal = this._rules[0].nonTerminal;
@@ -113,9 +113,8 @@ export class Grammatic {
           }
           const followSetAi = this._followSets.get!(Ai)!;
           const originalSetSize = followSetAi.size;
-          const rightSideRest =
-            index + 1 >= rule.replacement.length ? [EMPTY] : rule.replacement.slice(index + 1);
-          const fiPrimeRightSideRest = this.fiPrime(rightSideRest);
+          const rightSideRest = index + 1 >= rule.replacement.length ? [EMPTY] : rule.replacement.slice(index + 1);
+          const fiPrimeRightSideRest = this.calculateFirstSet(rightSideRest);
 
           for (const symbol of fiPrimeRightSideRest) {
             if (this.isTerminal(symbol)) {
@@ -137,62 +136,58 @@ export class Grammatic {
         }
       }
     } while (change);
-    return this._followSets;
   }
 
   private generateEmptySetsForNonTerminals(): Map<string, Set<string>> {
-    return new Map([...this.nonTerminals].map(val => [val, new Set<string>()]));
-  }
-
-  private calcPredictSet({ nonTerminal: inputNonTerminal, replacement: replacementSymbols }: ProductionRule): Set<string> {
-    let predictSet = this.first(replacementSymbols);
-    if (predictSet.has(EMPTY)) {
-      predictSet = new Set([...this._followSets.get(inputNonTerminal), ...predictSet]);
-      predictSet.delete(EMPTY);
-    }
-    return predictSet;
-  }
-
-  private first([head, ...rest]: string[]): Set<string> {
-    let set: string[];
-    if (this.isTerminal(head)) {
-      set = [head];
-    } else if (this.isNonTerminal(head)) {
-      set = [...this._firstSets.get(head)];
-    } else if (this.isEmpty(head)) {
-      set = [EMPTY];
-    } else {
-      set = [];
-    }
-    if (set.includes(EMPTY)) {
-      set = set.filter(val => this.isEmpty(val)).concat([...this.first(rest)]);
-    }
-    return new Set(set);
+    return new Map([...this._nonTerminals].map(val => [val, new Set<string>()]));
   }
 
   /**
+   * Calculates the prediction set of a production rule
+   * @description The prediction set of a rule can be formally defined as:
    *
-   * @param replacement the replacement defined by a production rule
+   * Prediction(A → α):
+   * - First(α), ε ∉ First(α)
+   * - First(α)\{ε} ∪ Follow(A), ε ∈ First(α)
+   * @param rule the production rule
    */
-  private fiPrime(replacement: string[]): Set<string> {
-    let fiPrimeSet = new Set<string>();
-    const [a, ...β] = replacement;
+  private calculatePredictionSet(rule: ProductionRule): Set<string> {
+    let predictionSet: Set<string>;
+    const { nonTerminal: S, replacement: α } = rule;
+    const αFirst = this.calculateFirstSet(α);
+    if (αFirst.has(EMPTY)) {
+      αFirst.delete(EMPTY);
+      predictionSet = new Set([...this._followSets.get(S), ...αFirst]);
+    } else {
+      predictionSet = αFirst;
+    }
+    return predictionSet;
+  }
+
+  /**
+   * Calculates the first-set of a given α
+   * @description Formally defined as Fi'(α)
+   * @param α a sequence of grammar symbols
+   */
+  private calculateFirstSet(α: string[]): Set<string> {
+    let fiPrimeSet: Set<string>;
+    const [a, ...β] = α;
 
     if (this.isTerminal(a)) {
-      // Fi'(aβ) = {a}, a is terminal
-      fiPrimeSet.add(a);
+      // Fi'(aβ) = {a}, a ∈ Terminals
+      fiPrimeSet = new Set([a]);
     } else if (this.isNonTerminal(a)) {
       const aFirstSet = this._firstSets.get(a)!;
-      // Fi'(aβ) += Fi(a)\{ε}, a is non-terminal
-      fiPrimeSet = new Set([...fiPrimeSet, ...aFirstSet]);
+      // Fi'(aβ) = Fi(a)\{ε}, a ∈ Non-terminals
+      fiPrimeSet = new Set(aFirstSet);
       fiPrimeSet.delete(EMPTY);
       if (aFirstSet.has(EMPTY)) {
-        // Fi'(aβ) + = Fi'(β)
-        fiPrimeSet = new Set([...fiPrimeSet, ...this.fiPrime(β)]);
+        // Fi'(aβ) U= Fi'(β)
+        fiPrimeSet = new Set([...fiPrimeSet, ...this.calculateFirstSet(β)]);
       }
     } else {
       // Fi'(aβ) = {ε}, aβ = ε
-      fiPrimeSet.add(EMPTY);
+      fiPrimeSet = new Set([EMPTY]);
     }
     return fiPrimeSet;
   }
