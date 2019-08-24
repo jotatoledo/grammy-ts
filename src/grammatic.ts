@@ -1,16 +1,17 @@
-import { EMPTY } from './special-chars';
+import { EMPTY, EOI } from './special-chars';
 import { ProductionRule } from './production-rule';
 
 function extractVocabulary(rules: ProductionRule[]): { terminals: Set<string>; nonTerminals: Set<string> } {
   const nonTerminals = new Set(rules.map(rule => rule.inputNonTerminal));
   const extract: (vals: string[]) => string[] = vals => vals.filter(val => val != 'ε' && !nonTerminals.has(val));
-  const terminals = new Set(rules.map(rule => rule.replacementSymbols)
-    .map(extract)
-    .reduce((acc, curr) => acc.concat(curr), new Array<string>()));
+  const terminals = new Set(
+    rules
+      .map(rule => rule.replacementSymbols)
+      .map(extract)
+      .reduce((acc, curr) => acc.concat(curr), new Array<string>())
+  );
   return { terminals, nonTerminals };
 }
-
-export type Terminal = string | null;
 
 export class Grammatic {
   private readonly _terminals: Set<string>;
@@ -32,20 +33,20 @@ export class Grammatic {
     return Array.from(this._nonTerminals);
   }
 
-  private _firstSet: Map<string, Set<Terminal>> | null = null;
-  get firstSets(): Map<string, Set<Terminal>> {
+  private _firstSet: Map<string, Set<string>> | null = null;
+  get firstSets(): Map<string, Set<string>> {
     if (!this._firstSet) {
       this._SetFirstSet();
     }
-    return this._firstSet!;
+    return new Map(Array.from(this._firstSet!.entries()).map(([x, set]) => [x, new Set(set)]));
   }
 
-  private _followSet: Map<string, Set<Terminal>> | null = null;
-  get followSet(): Map<string, Set<Terminal>> {
-    if (!this._followSet) {
+  private _followSets: Map<string, Set<string>> | null = null;
+  get followSets(): Map<string, Set<string>> {
+    if (!this._followSets) {
       this._SetFollowSet();
     }
-    return this._followSet!;
+    return new Map(Array.from(this._followSets!.entries()).map(([x, set]) => [x, new Set(set)]));
   }
 
   public isTerminal(item: string): boolean {
@@ -56,54 +57,100 @@ export class Grammatic {
     return this._nonTerminals.has(item);
   }
 
+  public isEmpty(item: string): boolean {
+    return item === EMPTY;
+  }
+
   private _SetFirstSet() {
     this._firstSet = this.generateSets();
     let change: boolean;
 
     do {
       change = false;
-      this._rules.forEach(rule => {
+      for (const rule of this._rules) {
         const ruleNonTerminal = rule.inputNonTerminal;
         const targetSet = this._firstSet!.get(ruleNonTerminal)!;
         const originalSize = targetSet.size;
 
-        for (const terminal of this.FiPrime(rule.replacementSymbols || [])) {
+        for (const terminal of this.FiPrime(rule.replacementSymbols)) {
           targetSet.add(terminal);
         }
         if (originalSize != targetSet.size) {
           change = true;
         }
-      });
+      }
     } while (change);
   }
 
-  private _SetFollowSet(): Map<string, Set<Terminal>> {
-    throw Error();
-  }
+  private _SetFollowSet() {
+    const startNonTerminal = this._rules[0].inputNonTerminal;
+    let change: boolean;
+    this._followSets = this.generateSets();
+    this._followSets.get(startNonTerminal)!.add(EOI);
 
-  private generateSets(): Map<string, Set<Terminal>> {
-    return new Map(this.nonTerminals.map(val => [val, new Set<Terminal>()]));
-  }
+    do {
+      change = false;
+      for (const rule of this._rules) {
+        const Aj = rule.inputNonTerminal;
 
-  private FiPrime(items: string[]): Set<Terminal> {
-    const fiPrimeSet = new Set<Terminal>();
-    if (items.length) {
-      const [head, ...rest] = items;
+        for (let index = 0; index < rule.replacementSymbols.length; index++) {
+          const Ai = rule.replacementSymbols[index];
+          if (!this.isNonTerminal(Ai)) {
+            continue;
+          }
+          const followSetAi = this._followSets.get(Ai)!;
+          const originalSetSize = followSetAi.size;
+          const rightSideRest =
+            index + 1 >= rule.replacementSymbols.length ? [EMPTY] : rule.replacementSymbols.slice(index + 1);
+          const fiPrimeRightSideRest = this.FiPrime(rightSideRest);
 
-      if (this.isTerminal(head)) {
-        fiPrimeSet.add(head);
-      } else {
-        const headSet = this.firstSets.get(head)!;
-        for (const terminal of Array.from(headSet).filter(Boolean)) {
-          fiPrimeSet.add(terminal);
-        }
-        if (headSet.has(EMPTY)) {
-          for (const terminal of this.FiPrime(rest)) {
-            fiPrimeSet.add(terminal);
+          for (const symbol of fiPrimeRightSideRest) {
+            if (this.isTerminal(symbol)) {
+              // Fo(Ai)+={a}, a ε Terminals ^ a ε Fi'(w')
+              followSetAi.add(symbol);
+            }
+          }
+
+          //  Ai != Aj ^ ε ε F'(w')
+          if (Ai != Aj && fiPrimeRightSideRest.has(EMPTY)) {
+            for (const symbol of this._followSets.get(Aj)!) {
+              // Fo(Ai)+=Fo(Aj)
+              followSetAi.add(symbol);
+            }
+          }
+          if (followSetAi.size != originalSetSize) {
+            change = true;
           }
         }
       }
+    } while (change);
+  }
+
+  private generateSets(): Map<string, Set<string>> {
+    return new Map(this.nonTerminals.map(val => [val, new Set<string>()]));
+  }
+
+  private FiPrime(items: string[]): Set<string> {
+    const fiPrimeSet = new Set<string>();
+    const [head, ...rest] = items;
+
+    if (this.isTerminal(head)) {
+      // Fi'(aw) = {a}
+      fiPrimeSet.add(head);
+    } else if (this.isNonTerminal(head)) {
+      const headFirstSet = this.firstSets.get(head)!;
+      // Fi'(Aw) += Fi(A)\{ε}
+      for (const terminal of Array.from(headFirstSet).filter(symbol => !this.isEmpty(symbol))) {
+        fiPrimeSet.add(terminal);
+      }
+      if (headFirstSet.has(EMPTY)) {
+        // Fi'(Aw) + = Fi'(w)
+        for (const terminal of this.FiPrime(rest)) {
+          fiPrimeSet.add(terminal);
+        }
+      }
     } else {
+      // Fi'(ε) = {ε}
       fiPrimeSet.add(EMPTY);
     }
     return fiPrimeSet;

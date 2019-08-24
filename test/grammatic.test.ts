@@ -1,4 +1,6 @@
-import { Grammatic, ProductionRule, Terminal, EMPTY } from 'grammy-ts';
+import { Grammatic, ProductionRule, EMPTY } from 'grammy-ts';
+
+import { TestData } from './test-data';
 
 describe('Grammatic', () => {
   it('should handle empty rules', () => {
@@ -9,7 +11,11 @@ describe('Grammatic', () => {
 
   describe('Non-Terminals', () => {
     it('should handle production rules with multiple transformations', () => {
-      const sut = createSut([new ProductionRule('S', ['a', 'B']), new ProductionRule('B', ['b']), new ProductionRule('B', [EMPTY])]);
+      const sut = createSut([
+        new ProductionRule('S', ['a', 'B']),
+        new ProductionRule('B', ['b']),
+        new ProductionRule('B', [EMPTY])
+      ]);
 
       expect(sut.nonTerminals).toEqual(['S', 'B']);
     });
@@ -17,25 +23,53 @@ describe('Grammatic', () => {
 
   describe('Terminals', () => {
     it('should handle production rules with multiple transformations', () => {
-      const sut = createSut([new ProductionRule('S', ['a', 'B']), new ProductionRule('B', ['b']), new ProductionRule('B', [EMPTY])]);
+      const sut = createSut([
+        new ProductionRule('S', ['a', 'B']),
+        new ProductionRule('B', ['b']),
+        new ProductionRule('B', [EMPTY])
+      ]);
 
       expect(sut.terminals).toEqual(['a', 'b']);
     });
   });
 
   describe('First-Sets', () => {
-    it('should correctly calculate', () => {
-      const rules: ProductionRule[] = [new ProductionRule('S', ['F']), new ProductionRule('S', ['(', 'S', '+', 'F', ')']), new ProductionRule('F', ['a'])];
-      const expectedFirstSets = new Map<string, Set<Terminal>>([
-        ['S', new Set<Terminal>(['a', '('])],
-        ['F', new Set<Terminal>(['a'])]
-      ]);
+    test.each(TestData)('it calculates correctly', ({ rules, firstSets }) => {
       const sut = createSut(rules);
 
-      const firstSets = sut.firstSets;
+      const result = sut.firstSets;
 
-      expect(firstSets).toBeTruthy();
-      expect(firstSets).toEqual(expectedFirstSets);
+      expect(result).toBeTruthy();
+      expect(result).toEqual(firstSets);
+    });
+
+    it('should return a new reference for every access', () => {
+      const sut = createSut([new ProductionRule('S', ['a'])]);
+
+      const first = sut.firstSets;
+      const second = sut.firstSets;
+
+      expect(first).not.toBe(second);
+    });
+  });
+
+  describe('Follow-Sets', () => {
+    test.each(TestData)('it calculates correctly', ({ rules, followSets }) => {
+      const sut = createSut(rules);
+
+      const result = sut.followSets;
+
+      expect(result).toBeTruthy();
+      expect(result).toEqual(followSets);
+    });
+
+    it('should return a new reference for every access', () => {
+      const sut = createSut([new ProductionRule('S', ['a'])]);
+
+      const first = sut.followSets;
+      const second = sut.followSets;
+
+      expect(first).not.toBe(second);
     });
   });
 

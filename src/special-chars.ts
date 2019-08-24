@@ -1,2 +1,2 @@
-export const EMPTY = "ε";
-export const EOI = '\u0000';
+export const EMPTY = 'ε';
+export const EOI = '$';
