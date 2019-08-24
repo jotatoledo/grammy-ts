@@ -17,7 +17,7 @@ describe('Rule', () => {
     expect(() => new ProductionRule('S', [])).toThrow();
   });
 
-  it("throws if a non-empty replacement rule contains the empty character", ()=>{
+  it('throws if a non-empty replacement rule contains the empty character', () => {
     expect(() => new ProductionRule('S', ['a', EMPTY])).toThrow();
   });
 });

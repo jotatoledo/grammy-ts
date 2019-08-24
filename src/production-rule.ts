@@ -1,8 +1,6 @@
 import { EMPTY } from './special-chars';
 
-const ruleRegex = /^(.*)\s?->\s?(.*)$/gm;
-
-function validateSymbols(vals: string[]) {
+function validateSymbols(vals: string[]): void {
   if (vals.some(val => !val)) {
     throw new Error('Falsy values are not allowed');
   }
@@ -10,11 +8,11 @@ function validateSymbols(vals: string[]) {
 
 export class ProductionRule {
   constructor(public readonly nonTerminal: string, public readonly replacement: string[]) {
-    if(!nonTerminal){
-      throw new Error("nonTerminal cannot be falsy");
+    if (!nonTerminal) {
+      throw new Error('nonTerminal cannot be falsy');
     }
-    if(!replacement){
-      throw new Error("replacement cannot be null");
+    if (!replacement) {
+      throw new Error('replacement cannot be null');
     }
 
     switch (replacement.length) {
@@ -25,7 +23,7 @@ export class ProductionRule {
         break;
       default:
         validateSymbols(replacement);
-        if (replacement.some(val => val == EMPTY)) {
+        if (replacement.some(val => val === EMPTY)) {
           throw new Error('Non-terminals and terminals can not be acompanied with the empty symbol');
         }
     }

@@ -1,6 +1,10 @@
-import { Grammatic, ProductionRule, EMPTY } from 'grammy-ts';
+import { Grammatic, ProductionRule } from 'grammy-ts';
 
 import { GrammaticData } from './grammatic.data';
+
+function createSut(rules: ProductionRule[]): Grammatic {
+  return new Grammatic(rules);
+}
 
 describe('Grammatic', () => {
   it('should handle empty rules', () => {
@@ -92,8 +96,4 @@ describe('Grammatic', () => {
       expect(first).not.toBe(second);
     });
   });
-
-  function createSut(rules: ProductionRule[]) {
-    return new Grammatic(rules);
-  }
 });

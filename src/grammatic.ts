@@ -3,7 +3,7 @@ import { ProductionRule } from './production-rule';
 
 function extractVocabulary(rules: ProductionRule[]): { terminals: Set<string>; nonTerminals: Set<string> } {
   const nonTerminals = new Set(rules.map(rule => rule.nonTerminal));
-  const extract: (vals: string[]) => string[] = vals => vals.filter(val => val != 'ε' && !nonTerminals.has(val));
+  const extract: (vals: string[]) => string[] = vals => vals.filter(val => val !== 'ε' && !nonTerminals.has(val));
   const terminals = new Set(
     rules
       .map(rule => rule.replacement)
@@ -11,6 +11,13 @@ function extractVocabulary(rules: ProductionRule[]): { terminals: Set<string>; n
       .reduce((acc, curr) => acc.concat(curr), new Array<string>())
   );
   return { terminals, nonTerminals };
+}
+
+function safeAccess<T>(val: T | undefined): T {
+  if (val === undefined) {
+    throw new Error('Value is undefined');
+  }
+  return val;
 }
 
 export class Grammatic {
@@ -49,15 +56,15 @@ export class Grammatic {
   }
 
   public getFirstSets(): Map<string, Set<string>> {
-    return new Map([...this._firstSets!].map(([x, set]) => [x, new Set(set)]));
+    return new Map([...this._firstSets].map(([x, set]) => [x, new Set(set)]));
   }
 
   public getFollowSets(): Map<string, Set<string>> {
-    return new Map([...this._followSets!].map(([x, set]) => [x, new Set(set)]));
+    return new Map([...this._followSets].map(([x, set]) => [x, new Set(set)]));
   }
 
   public getPredictionSets(): Map<number, Set<string>> {
-    return new Map([...this._predictionSets!].map(([x, set]) => [x, new Set(set)]));
+    return new Map([...this._predictionSets].map(([x, set]) => [x, new Set(set)]));
   }
 
   public isTerminal(item: string): boolean {
@@ -68,37 +75,37 @@ export class Grammatic {
     return this._nonTerminals.has(item);
   }
 
-  private calculatePredictionSets() {
+  private calculatePredictionSets(): void {
     for (let ruleIndex = 0; ruleIndex < this._rules.length; ruleIndex++) {
       this._predictionSets.set(ruleIndex, this.calculatePredictionSet(this._rules[ruleIndex]));
     }
   }
 
-  private calculateFirstSets() {
+  private calculateFirstSets(): void {
     let change: boolean;
 
     do {
       change = false;
       for (const { nonTerminal: inputNonTerminal, replacement: replacementSymbols } of this._rules) {
         const ruleNonTerminal = inputNonTerminal;
-        const activeFirstSet = this._firstSets.get(ruleNonTerminal)!;
+        const activeFirstSet = safeAccess(this._firstSets.get(ruleNonTerminal));
         const originalSize = activeFirstSet.size;
 
         for (const terminal of this.calculateFirstSet(replacementSymbols)) {
           activeFirstSet.add(terminal);
         }
-        if (originalSize != activeFirstSet.size) {
+        if (originalSize !== activeFirstSet.size) {
           change = true;
         }
       }
     } while (change);
   }
 
-  private calculateFollowSets() {
+  private calculateFollowSets(): void {
     let change: boolean;
-    if (!!this._rules.length) {
+    if (this._rules.length) {
       const startNonTerminal = this._rules[0].nonTerminal;
-      this._followSets.get(startNonTerminal)!.add(EOI);
+      safeAccess(this._followSets.get(startNonTerminal)).add(EOI);
     }
 
     do {
@@ -111,7 +118,7 @@ export class Grammatic {
           if (!this.isNonTerminal(Ai)) {
             continue;
           }
-          const followSetAi = this._followSets.get!(Ai)!;
+          const followSetAi = safeAccess(this._followSets.get(Ai));
           const originalSetSize = followSetAi.size;
           const rightSideRest = index + 1 >= rule.replacement.length ? [EMPTY] : rule.replacement.slice(index + 1);
           const fiPrimeRightSideRest = this.calculateFirstSet(rightSideRest);
@@ -124,13 +131,13 @@ export class Grammatic {
           }
 
           //  Ai != Aj ^ ε ε F'(w')
-          if (Ai != Aj && fiPrimeRightSideRest.has(EMPTY)) {
-            for (const symbol of this._followSets.get(Aj)!) {
+          if (Ai == Aj && fiPrimeRightSideRest.has(EMPTY)) {
+            for (const symbol of safeAccess(this._followSets.get(Aj))) {
               // Fo(Ai)+=Fo(Aj)
               followSetAi.add(symbol);
             }
           }
-          if (followSetAi.size != originalSetSize) {
+          if (followSetAi.size !== originalSetSize) {
             change = true;
           }
         }
@@ -157,7 +164,7 @@ export class Grammatic {
     const αFirst = this.calculateFirstSet(α);
     if (αFirst.has(EMPTY)) {
       αFirst.delete(EMPTY);
-      predictionSet = new Set([...this._followSets.get(S), ...αFirst]);
+      predictionSet = new Set([...safeAccess(this._followSets.get(S)), ...αFirst]);
     } else {
       predictionSet = αFirst;
     }
@@ -177,7 +184,7 @@ export class Grammatic {
       // Fi'(aβ) = {a}, a ∈ Terminals
       fiPrimeSet = new Set([a]);
     } else if (this.isNonTerminal(a)) {
-      const aFirstSet = this._firstSets.get(a)!;
+      const aFirstSet = safeAccess(this._firstSets.get(a));
       // Fi'(aβ) = Fi(a)\{ε}, a ∈ Non-terminals
       fiPrimeSet = new Set(aFirstSet);
       fiPrimeSet.delete(EMPTY);
