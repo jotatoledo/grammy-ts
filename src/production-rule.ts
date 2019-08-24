@@ -9,23 +9,23 @@ function validateSymbols(vals: string[]) {
 }
 
 export class ProductionRule {
-  constructor(public readonly inputNonTerminal: string, public readonly replacementSymbols: string[]) {
-    if(!inputNonTerminal){
-      throw new Error("inputNonTerminal cannot be falsy");
+  constructor(public readonly nonTerminal: string, public readonly replacement: string[]) {
+    if(!nonTerminal){
+      throw new Error("nonTerminal cannot be falsy");
     }
-    if(!replacementSymbols){
-      throw new Error("replacementSymbols cannot be null");
+    if(!replacement){
+      throw new Error("replacement cannot be null");
     }
 
-    switch (replacementSymbols.length) {
+    switch (replacement.length) {
       case 0:
-        throw new Error('Replacement tokens can not be empty');
+        throw new Error('replacement can not be empty');
       case 1:
-        validateSymbols(replacementSymbols);
+        validateSymbols(replacement);
         break;
       default:
-        validateSymbols(replacementSymbols);
-        if (replacementSymbols.some(val => val == EMPTY)) {
+        validateSymbols(replacement);
+        if (replacement.some(val => val == EMPTY)) {
           throw new Error('Non-terminals and terminals can not be acompanied with the empty symbol');
         }
     }

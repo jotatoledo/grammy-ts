@@ -6,7 +6,8 @@ export class GrammaticInput {
     public readonly terminals: Set<string>,
     public readonly nonTerminals: Set<string>,
     public readonly firstSets: Map<string, Set<string>>,
-    public readonly followSets: Map<string, Set<string>>
+    public readonly followSets: Map<string, Set<string>>,
+    public readonly predictionSets: Map<number, Set<string>>
   ) {}
 }
 
@@ -16,7 +17,8 @@ export const GrammaticData: GrammaticInput[] = [
     new Set(['a', 'b', 'c']),
     new Set(['S', 'A']),
     new Map([['S', new Set(['a'])], ['A', new Set(['b', EMPTY])]]),
-    new Map([['S', new Set([EOI])], ['A', new Set([EOI])]])
+    new Map([['S', new Set([EOI])], ['A', new Set([EOI])]]),
+    new Map([[0, new Set(['a'])], [1, new Set(['b'])], [2, new Set([EOI])]])
   ),
   new GrammaticInput(
     [
@@ -27,7 +29,8 @@ export const GrammaticData: GrammaticInput[] = [
     new Set(['(', '+', ')', 'a']),
     new Set(['S', 'F']),
     new Map([['S', new Set(['(', 'a'])], ['F', new Set(['a'])]]),
-    new Map([['S', new Set([EOI, '+'])], ['F', new Set([EOI, ')', '+'])]])
+    new Map([['S', new Set([EOI, '+'])], ['F', new Set([EOI, ')', '+'])]]),
+    new Map([[0, new Set(['a'])], [1, new Set(['('])], [2, new Set(['a'])]])
   ),
   new GrammaticInput(
     [
@@ -55,6 +58,16 @@ export const GrammaticData: GrammaticInput[] = [
       ['T', new Set(['+', EOI, ')'])],
       ["T'", new Set(['+', EOI, ')'])],
       ['F', new Set(['*', '+', EOI, ')'])]
+    ]),
+    new Map([
+      [0, new Set(['(', 'id'])],
+      [1, new Set(['+'])],
+      [2, new Set([EOI, ')'])],
+      [3, new Set(['(', 'id'])],
+      [4, new Set(['*'])],
+      [5, new Set(['+', EOI, ')'])],
+      [6, new Set(['('])],
+      [7, new Set(['id'])]
     ])
   )
 ];

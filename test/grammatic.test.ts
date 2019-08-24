@@ -29,6 +29,25 @@ describe('Grammatic', () => {
     });
   });
 
+  describe("Prediction-Sets", ()=>{
+    it('should return a new reference for every access', () => {
+      const sut = createSut([new ProductionRule('S', ['a'])]);
+
+      const first = sut.getPredictionSets();
+      const second = sut.firstSets;
+
+      expect(first).not.toBe(second);
+    });
+
+    test.each(GrammaticData)("it calculates correctly", ({rules, predictionSets}) =>{
+      const sut = createSut(rules);
+
+      const result = sut.getPredictionSets();
+
+      expect(result).toEqual(predictionSets)
+    });
+  })
+
   describe('First-Sets', () => {
     test.each(GrammaticData)('it calculates correctly', ({ rules, firstSets }) => {
       const sut = createSut(rules);
