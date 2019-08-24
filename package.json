@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "Another LL(K) grammar analyzer",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --p src/tsconfig.json",
     "test": "jest --forceExit --coverage --verbose",
     "test:watch": "npm run test -- --watchAll"
   },
