@@ -1,0 +1,19 @@
+import { ProductionRule, EMPTY } from 'grammy-js';
+
+describe('Rule', () => {
+  it('throws on falsy input terminal', () => {
+    expect(() => new ProductionRule('', ['a'])).toThrow();
+  });
+
+  it('throws if any replacement token is false', () => {
+    expect(() => new ProductionRule('S', ['a', ''])).toThrow();
+  });
+
+  it('throw if replacement tokens is empty', () => {
+    expect(() => new ProductionRule('S', [])).toThrow();
+  });
+
+  it("throws if a non-empty replacement rule contains the empty character", ()=>{
+    expect(() => new ProductionRule('S', ['a', EMPTY])).toThrow();
+  });
+});
