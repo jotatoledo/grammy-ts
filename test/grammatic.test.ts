@@ -1,6 +1,6 @@
 import { Grammatic, ProductionRule, EMPTY } from 'grammy-ts';
 
-import { TestData } from './test-data';
+import { GrammaticData } from './grammatic.data';
 
 describe('Grammatic', () => {
   it('should handle empty rules', () => {
@@ -14,7 +14,7 @@ describe('Grammatic', () => {
   });
 
   describe('Non-Terminals', () => {
-    test.each(TestData)('it calculates correctly', ({ rules, nonTerminals }) => {
+    test.each(GrammaticData)('it calculates correctly', ({ rules, nonTerminals }) => {
       const sut = createSut(rules);
 
       expect(sut.nonTerminals).toEqual(nonTerminals);
@@ -22,7 +22,7 @@ describe('Grammatic', () => {
   });
 
   describe('Terminals', () => {
-    test.each(TestData)('it calculates correctly', ({ rules, terminals }) => {
+    test.each(GrammaticData)('it calculates correctly', ({ rules, terminals }) => {
       const sut = createSut(rules);
 
       expect(sut.terminals).toEqual(terminals);
@@ -30,7 +30,7 @@ describe('Grammatic', () => {
   });
 
   describe('First-Sets', () => {
-    test.each(TestData)('it calculates correctly', ({ rules, firstSets }) => {
+    test.each(GrammaticData)('it calculates correctly', ({ rules, firstSets }) => {
       const sut = createSut(rules);
 
       const result = sut.firstSets;
@@ -50,7 +50,7 @@ describe('Grammatic', () => {
   });
 
   describe('Follow-Sets', () => {
-    test.each(TestData)('it calculates correctly', ({ rules, followSets }) => {
+    test.each(GrammaticData)('it calculates correctly', ({ rules, followSets }) => {
       const sut = createSut(rules);
 
       const result = sut.followSets;

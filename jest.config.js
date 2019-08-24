@@ -12,5 +12,6 @@ module.exports = {
     '^.+\\.(ts|tsx)$': 'ts-jest'
   },
   testMatch: ['**/test/**/*.test.(ts|js)'],
-  testEnvironment: 'node'
+  testEnvironment: 'node',
+  collectCoverageFrom: ['src/**/*.{ts,js}', '!src/index.(ts|js)']
 };

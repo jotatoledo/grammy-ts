@@ -10,7 +10,7 @@ export class GrammaticInput {
   ) {}
 }
 
-export const TestData: GrammaticInput[] = [
+export const GrammaticData: GrammaticInput[] = [
   new GrammaticInput(
     [new ProductionRule('S', ['a', 'b', 'A']), new ProductionRule('A', ['b', 'c']), new ProductionRule('A', [EMPTY])],
     new Set(['a', 'b', 'c']),
