@@ -1,4 +1,4 @@
-# grammar-ts
+# grammy-ts
 
 Another *LL(K) grammar* analyzer.
 

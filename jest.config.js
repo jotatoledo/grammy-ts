@@ -5,7 +5,7 @@ module.exports = {
     }
   },
   moduleNameMapper: {
-    'grammy-js': '<rootDir>/src/index.ts'
+    'grammy-ts': '<rootDir>/src/index.ts'
   },
   moduleFileExtensions: ['ts', 'js'],
   transform: {

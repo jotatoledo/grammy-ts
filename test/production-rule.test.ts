@@ -1,4 +1,4 @@
-import { ProductionRule, EMPTY } from 'grammy-js';
+import { ProductionRule, EMPTY } from 'grammy-ts';
 
 describe('Rule', () => {
   it('throws on falsy input terminal', () => {

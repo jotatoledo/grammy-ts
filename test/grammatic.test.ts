@@ -1,4 +1,4 @@
-import { Grammatic, ProductionRule, Terminal, EMPTY } from 'grammy-js';
+import { Grammatic, ProductionRule, Terminal, EMPTY } from 'grammy-ts';
 
 describe('Grammatic', () => {
   it('should handle empty rules', () => {

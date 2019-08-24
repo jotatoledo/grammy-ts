@@ -1,5 +1,5 @@
 {
-  "name": "grammar-ts",
+  "name": "grammy-ts",
   "version": "0.0.0",
   "description": "Another LL(K) grammar analyzer",
   "scripts": {
