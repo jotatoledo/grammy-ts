@@ -8,7 +8,7 @@
     "test": "jest --forceExit --coverage --verbose",
     "test:watch": "npm run test -- --watchAll",
     "lint": "npm run lint:ts",
-    "lint:ts": "eslint {src,test}/**/*.ts",
+    "lint:ts": "eslint **/*.{ts,js}",
     "lint:ts--fix": "npm run lint:ts -- --fix",
     "format": "prettier -c **/*.{ts,js,md,json}",
     "format--fix": "npm run format -- --write"

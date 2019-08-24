@@ -131,7 +131,7 @@ export class Grammatic {
           }
 
           //  Ai != Aj ^ ε ε F'(w')
-          if (Ai == Aj && fiPrimeRightSideRest.has(EMPTY)) {
+          if (Ai !== Aj && fiPrimeRightSideRest.has(EMPTY)) {
             for (const symbol of safeAccess(this._followSets.get(Aj))) {
               // Fo(Ai)+=Fo(Aj)
               followSetAi.add(symbol);

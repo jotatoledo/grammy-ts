@@ -10,5 +10,8 @@
   "plugins": ["@typescript-eslint"],
   "env": {
     "node": true
+  },
+  "rules": {
+    "eqeqeq": "error"
   }
 }
