@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "description": "Another LL(K) grammar analyzer",
   "scripts": {
-    "build": "tsc --p src/tsconfig.json",
+    "build": "rm -rf dist && rollup -c config/rollup.config.ts",
     "coveralls": "cat ./coverage/lcov.info | node ./node_modules/coveralls/bin/coveralls.js",
-    "test": "jest --forceExit --coverage --verbose",
+    "test": "jest -c config/jest.config.js --rootDir . --forceExit --coverage --verbose",
     "test:watch": "npm run test -- --watchAll",
     "lint": "npm run lint:ts",
     "lint:ts": "eslint **/*.{ts,js}",
@@ -13,8 +13,11 @@
     "format": "prettier -c **/*.{ts,js,md,json}",
     "format--fix": "npm run format -- --write"
   },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/bundles/grammy-ts.umd.js",
+  "module": "dist/es5/grammy-ts.esm.js",
+  "es2015": "./es2015/grammy-ts.esm.js",
+  "types": "dist/grammy-ts.d.ts",
+  "typings": "dist/grammy-ts.d.ts",
   "keywords": [
     "grammar",
     "ll(k)-grammar",
@@ -24,7 +27,7 @@
     "url": "https://github.com/jotatoledo/grammar-ts/issues"
   },
   "engines": {
-    "node": ">=10.16.3",
+    "node": ">=10",
     "npm": ">=6"
   },
   "repository": {
@@ -39,6 +42,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^24.0.18",
+    "@types/rollup-plugin-sourcemaps": "^0.4.2",
     "@typescript-eslint/eslint-plugin": "^2.0.0",
     "@typescript-eslint/parser": "^2.0.0",
     "acorn": "^7.0.0",
@@ -47,9 +51,17 @@
     "eslint-config-prettier": "^6.1.0",
     "jest": "^24.9.0",
     "prettier": "^1.18.2",
+    "rollup": "^1.20.1",
+    "rollup-plugin-commonjs": "^10.0.2",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-sourcemaps": "^0.4.2",
+    "rollup-plugin-terser": "^5.1.1",
+    "rollup-plugin-typescript2": "^0.23.0",
     "ts-jest": "^24.0.2",
+    "ts-loader": "^6.0.4",
     "typescript": "^3.5.3"
   },
+  "peerDependencies": {},
   "dependencies": {
     "monet": "^0.9.0"
   }

@@ -30,5 +30,8 @@ jobs:
       - run:
           name: coverage-report
           command: npm run coveralls
+      - run:
+          name: build
+          command: npm run build
       - store_test_results:
           path: coverage

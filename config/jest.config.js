@@ -1,7 +1,7 @@
 module.exports = {
   globals: {
     'ts-jest': {
-      tsConfig: 'test/tsconfig.json'
+      tsConfig: '<rootDir>/test/tsconfig.json'
     }
   },
   moduleNameMapper: {
@@ -13,5 +13,5 @@ module.exports = {
   },
   testMatch: ['**/test/**/*.test.(ts|js)'],
   testEnvironment: 'node',
-  collectCoverageFrom: ['src/**/*.{ts,js}', '!src/index.(ts|js)']
+  collectCoverageFrom: ['<rootDir>/src/**/*.{ts,js}', '!<rootDir>/src/index.(ts|js)']
 };

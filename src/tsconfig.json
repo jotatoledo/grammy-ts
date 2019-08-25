@@ -1,7 +1,4 @@
 {
   "extends": "../tsconfig.base.json",
-  "compilerOptions": {
-    "declaration": true,
-    "strict": true
-  }
+  "compilerOptions": { "strict": true }
 }

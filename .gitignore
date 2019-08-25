@@ -37,6 +37,7 @@ yarn-error.log*
 /coverage
 /libpeerconnection.log
 /typings
+/cache
 
 # e2e
 /e2e/*.js

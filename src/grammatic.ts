@@ -155,7 +155,7 @@ export class Grammatic {
    *
    * Prediction(A → α):
    * - First(α), ε ∉ First(α)
-   * - First(α)\{ε} ∪ Follow(A), ε ∈ First(α)
+   * - First(α)\ {ε} ∪ Follow(A), ε ∈ First(α)
    * @param rule the production rule
    */
   private calculatePredictionSet(rule: ProductionRule): Set<string> {
