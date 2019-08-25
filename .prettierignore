@@ -1,6 +1,7 @@
 node_modules/
 dist/
 coverage/
+cache/
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
