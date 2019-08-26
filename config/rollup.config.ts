@@ -4,25 +4,23 @@ import sourceMaps from 'rollup-plugin-sourcemaps';
 import typescript from 'rollup-plugin-typescript2';
 import { terser } from 'rollup-plugin-terser';
 
-import pkg from '../package.json';
-
-const libName = 'grammy-ts';
-const distFolder = 'dist';
+import { name, dependencies, peerDependencies } from '../package.json';
+const buildConfig = require("../build.config");
 
 const globals = {
   monet: 'monet'
 };
 
-const external = [...Object.keys(pkg.dependencies || {}), ...Object.keys(pkg.peerDependencies || {})];
+const external = [...Object.keys(dependencies || {}), ...Object.keys(peerDependencies || {})];
 
 export default [
   {
     input: `src/index.ts`,
     output: [
-      { file: `${distFolder}/bundles/${libName}.umd.js`, name: libName, format: 'umd', globals, sourcemap: true },
+      { file: `${buildConfig.distRoot}/bundles/${name}.umd.js`, name: name, format: 'umd', globals, sourcemap: true },
       {
-        file: `${distFolder}/bundles/${libName}.umd.min.js`,
-        name: libName,
+        file: `${buildConfig.distRoot}/bundles/${name}.umd.min.js`,
+        name: name,
         format: 'umd',
         globals,
         sourcemap: true
@@ -49,7 +47,7 @@ export default [
   },
   {
     input: 'src/index.ts',
-    output: { file: `${distFolder}/es5/${libName}.esm.js`, format: 'es', sourcemap: true },
+    output: { file: `${buildConfig.distRoot}/es5/${name}.esm.js`, format: 'es', sourcemap: true },
     external,
     plugins: [
       typescript({
@@ -68,7 +66,7 @@ export default [
   },
   {
     input: 'src/index.ts',
-    output: { file: `${distFolder}/es2015/${libName}.esm.js`, format: 'es', sourcemap: true },
+    output: { file: `${buildConfig.distRoot}/es2015/${name}.esm.js`, format: 'es', sourcemap: true },
     external,
     plugins: [
       typescript({
