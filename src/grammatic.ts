@@ -6,7 +6,7 @@ function extractVocabulary(rules: ProductionRule[]): { terminals: Set<string>; n
   const extract: (vals: string[]) => string[] = vals => vals.filter(val => val !== 'ε' && !nonTerminals.has(val));
   const terminals = new Set(
     rules
-      .map(rule => rule.replacement)
+      .map(rule => rule.replacementSymbols)
       .map(extract)
       .reduce((acc, curr) => acc.concat(curr), new Array<string>())
   );
@@ -86,8 +86,7 @@ export class Grammatic {
 
     do {
       change = false;
-      for (const { nonTerminal: inputNonTerminal, replacement: replacementSymbols } of this._rules) {
-        const ruleNonTerminal = inputNonTerminal;
+      for (const { nonTerminal: ruleNonTerminal, replacementSymbols } of this._rules) {
         const activeFirstSet = safeAccess(this._firstSets.get(ruleNonTerminal));
         const originalSize = activeFirstSet.size;
 
@@ -113,14 +112,14 @@ export class Grammatic {
       for (const rule of this._rules) {
         const Aj = rule.nonTerminal;
 
-        for (let index = 0; index < rule.replacement.length; index++) {
-          const Ai = rule.replacement[index];
+        for (let index = 0; index < rule.replacementSymbols.length; index++) {
+          const Ai = rule.replacementSymbols[index];
           if (!this.isNonTerminal(Ai)) {
             continue;
           }
           const followSetAi = safeAccess(this._followSets.get(Ai));
           const originalSetSize = followSetAi.size;
-          const rightSideRest = index + 1 >= rule.replacement.length ? [EMPTY] : rule.replacement.slice(index + 1);
+          const rightSideRest = index + 1 >= rule.replacementSymbols.length ? [EMPTY] : rule.replacementSymbols.slice(index + 1);
           const fiPrimeRightSideRest = this.calculateFirstSet(rightSideRest);
 
           for (const symbol of fiPrimeRightSideRest) {
@@ -154,13 +153,13 @@ export class Grammatic {
    * @description The prediction set of a rule can be formally defined as:
    *
    * Prediction(A → α):
-   * - First(α), ε ∉ First(α)
-   * - First(α)\ {ε} ∪ Follow(A), ε ∈ First(α)
+   * - Fi'(α), ε ∉ Fi'(α)
+   * - Fi'(α)\ {ε} ∪ Follow(A), ε ∈ Fi'(α)
    * @param rule the production rule
    */
   private calculatePredictionSet(rule: ProductionRule): Set<string> {
     let predictionSet: Set<string>;
-    const { nonTerminal: S, replacement: α } = rule;
+    const { nonTerminal: S, replacementSymbols: α } = rule;
     const αFirst = this.calculateFirstSet(α);
     if (αFirst.has(EMPTY)) {
       αFirst.delete(EMPTY);
@@ -173,7 +172,12 @@ export class Grammatic {
 
   /**
    * Calculates the first-set of a given α
-   * @description Formally defined as Fi'(α)
+   * @description Formally defined as Fi'(α), with:
+   *
+   * - Fi'(αβ) = { α }, if α is a terminal
+   * - Fi'(Aβ) = Fi(A),if ε not in Fi(A)
+   * - Fi'(Aβ) = Fi(A) \ { ε } ∪ Fi'(β), if ε in Fi(A)
+   * - Fi'(ε) = { ε }
    * @param α a sequence of grammar symbols
    */
   private calculateFirstSet(α: string[]): Set<string> {

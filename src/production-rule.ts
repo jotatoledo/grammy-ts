@@ -7,25 +7,29 @@ function validateSymbols(vals: string[]): void {
 }
 
 export class ProductionRule {
-  constructor(public readonly nonTerminal: string, public readonly replacement: string[]) {
+  constructor(public readonly nonTerminal: string, public readonly replacementSymbols: string[]) {
     if (!nonTerminal) {
       throw new Error('nonTerminal cannot be falsy');
     }
-    if (!replacement) {
+    if (!replacementSymbols) {
       throw new Error('replacement cannot be null');
     }
 
-    switch (replacement.length) {
+    switch (replacementSymbols.length) {
       case 0:
         throw new Error('replacement can not be empty');
       case 1:
-        validateSymbols(replacement);
+        validateSymbols(replacementSymbols);
         break;
       default:
-        validateSymbols(replacement);
-        if (replacement.some(val => val === EMPTY)) {
+        validateSymbols(replacementSymbols);
+        if (replacementSymbols.some(val => val === EMPTY)) {
           throw new Error('Non-terminals and terminals can not be acompanied with the empty symbol');
         }
     }
+  }
+
+  get replacementSentence(): string {
+    return this.replacementSymbols.join(' ');
   }
 }
