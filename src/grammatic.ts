@@ -119,7 +119,8 @@ export class Grammatic {
           }
           const followSetAi = safeAccess(this._followSets.get(Ai));
           const originalSetSize = followSetAi.size;
-          const rightSideRest = index + 1 >= rule.replacementSymbols.length ? [EMPTY] : rule.replacementSymbols.slice(index + 1);
+          const rightSideRest =
+            index + 1 >= rule.replacementSymbols.length ? [EMPTY] : rule.replacementSymbols.slice(index + 1);
           const fiPrimeRightSideRest = this.calculateFirstSet(rightSideRest);
 
           for (const symbol of fiPrimeRightSideRest) {
