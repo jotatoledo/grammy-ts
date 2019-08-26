@@ -1,7 +1,7 @@
 module.exports = {
-  libName: "grammy-ts",
+  libName: 'grammy-ts',
   distRoot: 'dist',
   srcRoot: 'src',
   entryPoint: 'src/index.ts',
-  tsConfig: "src/tsconfig.json"
+  tsConfig: 'src/tsconfig.json'
 };

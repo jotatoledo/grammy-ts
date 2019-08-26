@@ -5,7 +5,7 @@ import typescript from 'rollup-plugin-typescript2';
 import { terser } from 'rollup-plugin-terser';
 
 import { name, dependencies, peerDependencies } from '../package.json';
-const buildConfig = require("../build.config");
+const buildConfig = require('../build.config');
 
 const globals = {
   monet: 'monet'
